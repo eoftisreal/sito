@@ -1,204 +1,179 @@
-// API Configuration - Use relative URL to work in both local and codespace environments
+// API Configuration
 const API_URL = window.location.origin.includes('localhost') 
     ? 'http://localhost:3000/api' 
     : `${window.location.origin}/api`;
 
-// Game state
+// Game State
 let movies = [];
+let players = [];
 let currentMovieIndex = 0;
-let playerName = 'Guest';
-let playerScore = 0;
-let moviesShown = 0;
 
-// DOM elements
+// DOM Elements
 const startScreen = document.getElementById('start-screen');
+const videoScreen = document.getElementById('video-screen');
 const gameScreen = document.getElementById('game-screen');
 const endScreen = document.getElementById('end-screen');
-const startBtn = document.getElementById('start-btn');
-const playerNameInput = document.getElementById('player-name-input');
-const currentPlayerElement = document.getElementById('current-player');
-const playerScoreElement = document.getElementById('player-score');
-const movieScreenshot = document.getElementById('movie-screenshot');
-const movieTitleDisplay = document.getElementById('movie-title-display');
-const currentMovieElement = document.getElementById('current-movie');
-const totalMoviesElement = document.getElementById('total-movies');
-const feedbackElement = document.getElementById('feedback');
-const finalScoreElement = document.getElementById('final-score');
-const finalPlayerNameElement = document.getElementById('final-player-name');
-const moviesCountElement = document.getElementById('movies-count');
-const restartBtn = document.getElementById('restart-btn');
 
-// Admin control buttons
-const correctBtn = document.getElementById('correct-btn');
-const wrongBtn = document.getElementById('wrong-btn');
-const award5Btn = document.getElementById('award-5-btn');
-const award20Btn = document.getElementById('award-20-btn');
+// Buttons
+const startBtn = document.getElementById('start-btn');
+const skipVideoBtn = document.getElementById('skip-video-btn');
 const revealBtn = document.getElementById('reveal-btn');
 const nextBtn = document.getElementById('next-btn');
+const restartBtn = document.getElementById('restart-btn');
 
-// Load movies from API
-async function loadMoviesFromAPI() {
-    try {
-        const response = await fetch(`${API_URL}/movies`);
-        movies = await response.json();
-        
-        if (movies.length === 0) {
-            alert('No movies available! Please add movies from the admin panel.');
-            return false;
-        }
-        
-        // Shuffle movies
-        movies = movies.sort(() => Math.random() - 0.5);
-        return true;
-    } catch (error) {
-        console.error('Error loading movies:', error);
-        alert('Failed to load movies! Make sure the server is running on port 3000.');
-        return false;
-    }
-}
+// Video
+const introVideo = document.getElementById('intro-video');
 
-// Initialize game
-function initGame() {
-    currentMovieIndex = 0;
-    playerScore = 0;
-    moviesShown = 0;
-    updatePlayerScore();
-}
+// Game Elements
+const movieScreenshot = document.getElementById('movie-screenshot');
+const movieTitleDisplay = document.getElementById('movie-title-display');
+const revealOverlay = document.getElementById('reveal-overlay');
+const currentMovieNum = document.getElementById('current-movie');
+const totalMoviesNum = document.getElementById('total-movies');
+const activePlayersGrid = document.getElementById('active-players-grid');
+const winnerDisplay = document.getElementById('winner-display');
 
-// Start game
-async function startGame() {
-    const name = playerNameInput.value.trim();
-    
-    if (!name) {
-        alert('Please enter your name!');
-        return;
-    }
-    
-    playerName = name;
-    
-    // Load movies from API
-    const loaded = await loadMoviesFromAPI();
-    if (!loaded) return;
-    
-    initGame();
-    currentPlayerElement.textContent = playerName;
+// Event Listeners
+startBtn.addEventListener('click', () => {
     startScreen.classList.remove('active');
-    gameScreen.classList.add('active');
-    totalMoviesElement.textContent = movies.length;
-    loadMovie();
-}
+    videoScreen.classList.add('active');
+    introVideo.currentTime = 0;
+    introVideo.play().catch(e => console.log("Autoplay prevented:", e));
 
-// Load current movie
-function loadMovie() {
+    // Auto-advance when video ends
+    introVideo.onended = () => startGame();
+});
+
+skipVideoBtn.addEventListener('click', () => {
+    introVideo.pause();
+    startGame();
+});
+
+revealBtn.addEventListener('click', () => {
+    revealOverlay.classList.add('show');
+});
+
+nextBtn.addEventListener('click', () => {
+    currentMovieIndex++;
     if (currentMovieIndex >= movies.length) {
         endGame();
-        return;
+    } else {
+        loadMovie();
     }
+});
 
+restartBtn.addEventListener('click', () => {
+    location.reload();
+});
+
+// Functions
+async function startGame() {
+    videoScreen.classList.remove('active');
+    gameScreen.classList.add('active');
+    
+    await Promise.all([loadMovies(), loadPlayers()]);
+    
+    if (movies.length > 0) {
+        // Shuffle movies
+        movies = movies.sort(() => Math.random() - 0.5);
+        totalMoviesNum.textContent = movies.length;
+        loadMovie();
+    } else {
+        alert("No movies found! Please add movies in Admin Panel.");
+    }
+}
+
+async function loadMovies() {
+    try {
+        const res = await fetch(`${API_URL}/movies`);
+        movies = await res.json();
+    } catch (e) {
+        console.error("Error loading movies:", e);
+    }
+}
+
+function loadMovie() {
     const movie = movies[currentMovieIndex];
     movieScreenshot.src = movie.screenshot;
-    currentMovieElement.textContent = currentMovieIndex + 1;
-    movieTitleDisplay.style.display = 'none';
     movieTitleDisplay.textContent = movie.title;
-    feedbackElement.classList.remove('show', 'correct', 'wrong');
-    moviesShown++;
+    revealOverlay.classList.remove('show');
+    currentMovieNum.textContent = currentMovieIndex + 1;
 }
 
-// Handle correct answer
-async function handleCorrect() {
-    const points = 10;
-    playerScore += points;
-    updatePlayerScore();
+async function loadPlayers() {
+    try {
+        const res = await fetch(`${API_URL}/players`);
+        players = await res.json();
+        renderPlayers();
+    } catch (e) {
+        console.error("Error loading players:", e);
+    }
+}
+
+function renderPlayers() {
+    activePlayersGrid.innerHTML = '';
     
-    // Update score in backend
-    await updatePlayerScoreAPI(playerName, points);
+    // Sort by score (Highest first)
+    players.sort((a, b) => b.score - a.score);
     
-    showFeedback(true, `Correct! +${points} points`);
+    players.forEach(player => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+
+        const photoUrl = player.photo ? player.photo : `https://ui-avatars.com/api/?name=${player.name}&background=random`;
+
+        card.innerHTML = `
+            <img src="${photoUrl}" alt="${player.name}" class="player-avatar">
+            <div class="player-info">
+                <div class="player-name">${player.name}</div>
+                <div class="player-score">${player.score} pts</div>
+            </div>
+            <div class="score-controls">
+                <button class="btn-score btn-plus" onclick="updateScore('${player.name}', 10)">+</button>
+                <button class="btn-score btn-minus" onclick="updateScore('${player.name}', -5)">-</button>
+            </div>
+        `;
+        activePlayersGrid.appendChild(card);
+    });
 }
 
-// Handle wrong answer
-function handleWrong() {
-    showFeedback(false, `Wrong answer!`);
-}
-
-// Award custom points
-async function awardPoints(points) {
-    playerScore += points;
-    updatePlayerScore();
-    
-    // Update score in backend
-    await updatePlayerScoreAPI(playerName, points);
-    
-    showFeedback(true, `Awarded ${points > 0 ? '+' : ''}${points} points!`);
-}
-
-// Reveal movie title
-function revealAnswer() {
-    movieTitleDisplay.style.display = 'block';
-    showFeedback(true, 'Answer revealed!');
-}
-
-// Next movie
-function nextMovie() {
-    currentMovieIndex++;
-    loadMovie();
-}
-
-// Update player score in API
-async function updatePlayerScoreAPI(name, points) {
+async function updateScore(name, points) {
     try {
         await fetch(`${API_URL}/players/${encodeURIComponent(name)}/score`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ points })
         });
-    } catch (error) {
-        console.error('Error updating score:', error);
+
+        // Update local state and re-render
+        const player = players.find(p => p.name === name);
+        if (player) {
+            player.score += points;
+            renderPlayers();
+        }
+    } catch (e) {
+        console.error("Error updating score:", e);
     }
 }
 
-// Show feedback
-function showFeedback(isCorrect, message) {
-    feedbackElement.textContent = message;
-    feedbackElement.classList.add('show');
-    feedbackElement.classList.add(isCorrect ? 'correct' : 'wrong');
-}
-
-// Update player score display
-function updatePlayerScore() {
-    playerScoreElement.textContent = playerScore;
-}
-
-// End game
 function endGame() {
     gameScreen.classList.remove('active');
     endScreen.classList.add('active');
     
-    finalPlayerNameElement.textContent = playerName;
-    finalScoreElement.textContent = playerScore;
-    moviesCountElement.textContent = moviesShown;
-}
+    if (players.length > 0) {
+        const winner = players[0]; // Already sorted
+        const photoUrl = winner.photo ? winner.photo : `https://ui-avatars.com/api/?name=${winner.name}&background=random`;
 
-// Restart game
-function restartGame() {
-    endScreen.classList.remove('active');
-    startScreen.classList.add('active');
-    playerNameInput.value = '';
-}
-
-// Event listeners
-startBtn.addEventListener('click', startGame);
-correctBtn.addEventListener('click', handleCorrect);
-wrongBtn.addEventListener('click', handleWrong);
-award5Btn.addEventListener('click', () => awardPoints(5));
-award20Btn.addEventListener('click', () => awardPoints(20));
-revealBtn.addEventListener('click', revealAnswer);
-nextBtn.addEventListener('click', nextMovie);
-restartBtn.addEventListener('click', restartGame);
-
-// Allow Enter key to start game
-playerNameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        startGame();
+        winnerDisplay.innerHTML = `
+            <div class="winner-card">
+                <img src="${photoUrl}" class="winner-avatar">
+                <h2>WINNER</h2>
+                <h1 class="glow-text">${winner.name}</h1>
+                <h3>${winner.score} Points</h3>
+            </div>
+        `;
     }
-});
+}
+
+// Global scope for HTML onclick
+window.updateScore = updateScore;

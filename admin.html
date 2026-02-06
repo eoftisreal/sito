@@ -71,11 +71,17 @@
             <!-- Players Management Tab -->
             <div id="players-tab" class="tab-content">
                 <div class="section">
-                    <h2>Add/Update Player</h2>
+                    <h2>Add Player</h2>
                     <form id="add-player-form" class="form-card">
                         <div class="form-group">
                             <label for="player-name">Player Name *</label>
                             <input type="text" id="player-name" required placeholder="Enter player name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="player-photo">Player Photo</label>
+                            <input type="file" id="player-photo" accept="image/*">
+                            <div id="player-image-preview" class="image-preview"></div>
                         </div>
                         
                         <div class="form-group">
@@ -83,24 +89,14 @@
                             <input type="number" id="player-score" value="0" min="0">
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">Add/Update Player</button>
+                        <button type="submit" class="btn btn-primary">Add Player</button>
                     </form>
                 </div>
 
                 <div class="section">
-                    <h2>Players Leaderboard</h2>
-                    <div id="players-list" class="players-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Rank</th>
-                                    <th>Player Name</th>
-                                    <th>Score</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="players-tbody"></tbody>
-                        </table>
+                    <h2>Player Roster</h2>
+                    <div id="players-list" class="players-grid">
+                        <!-- Players will be populated here as cards -->
                     </div>
                 </div>
             </div>
