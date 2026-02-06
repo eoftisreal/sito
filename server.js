@@ -216,7 +216,7 @@ app.get('/api/players', (req, res) => {
 });
 
 // Add or update player
-app.post('/api/players', (req, res) => {
+app.post('/api/players', upload.single('photo'), (req, res) => {
     try {
         const data = readData();
         const { name, score } = req.body;
@@ -228,12 +228,23 @@ app.post('/api/players', (req, res) => {
         const existingPlayerIndex = data.players.findIndex(p => p.name === name);
         
         if (existingPlayerIndex !== -1) {
-            data.players[existingPlayerIndex].score = parseInt(score) || 0;
+            // Update existing player
+            if (score !== undefined) data.players[existingPlayerIndex].score = parseInt(score);
+            if (req.file) {
+                // Remove old photo if exists
+                if (data.players[existingPlayerIndex].photo && data.players[existingPlayerIndex].photo.startsWith('/uploads/')) {
+                    const oldPath = path.join(__dirname, data.players[existingPlayerIndex].photo);
+                    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+                }
+                data.players[existingPlayerIndex].photo = `/uploads/${req.file.filename}`;
+            }
         } else {
+            // Create new player
             data.players.push({
                 id: data.players.length > 0 ? Math.max(...data.players.map(p => p.id)) + 1 : 1,
                 name: name,
-                score: parseInt(score) || 0
+                score: parseInt(score) || 0,
+                photo: req.file ? `/uploads/${req.file.filename}` : null
             });
         }
         
@@ -244,6 +255,38 @@ app.post('/api/players', (req, res) => {
         }
     } catch (error) {
         console.error('Error updating player:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete player
+app.delete('/api/players/:id', (req, res) => {
+    try {
+        const data = readData();
+        const playerIndex = data.players.findIndex(p => p.id === parseInt(req.params.id));
+
+        if (playerIndex === -1) {
+            return res.status(404).json({ error: 'Player not found' });
+        }
+
+        // Delete photo file if it exists
+        const player = data.players[playerIndex];
+        if (player.photo && player.photo.startsWith('/uploads/')) {
+            const imagePath = path.join(__dirname, player.photo);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+
+        data.players.splice(playerIndex, 1);
+
+        if (writeData(data)) {
+            res.json({ success: true, message: 'Player deleted' });
+        } else {
+            res.status(500).json({ error: 'Failed to save data' });
+        }
+    } catch (error) {
+        console.error('Error deleting player:', error);
         res.status(500).json({ error: error.message });
     }
 });

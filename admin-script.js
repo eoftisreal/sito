@@ -28,7 +28,9 @@ const moviesList = document.getElementById('movies-list');
 const addPlayerForm = document.getElementById('add-player-form');
 const playerName = document.getElementById('player-name');
 const playerScore = document.getElementById('player-score');
-const playersTbody = document.getElementById('players-tbody');
+const playerPhoto = document.getElementById('player-photo');
+const playerImagePreview = document.getElementById('player-image-preview');
+const playersList = document.getElementById('players-list');
 
 // Modal elements
 const editModal = document.getElementById('edit-modal');
@@ -265,18 +267,33 @@ async function deleteMovie(id) {
     }
 }
 
-// Add/Update player
+// Player photo preview
+playerPhoto.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            playerImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Add Player
 addPlayerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    const formData = new FormData();
+    formData.append('name', playerName.value);
+    formData.append('score', playerScore.value);
+    if (playerPhoto.files[0]) {
+        formData.append('photo', playerPhoto.files[0]);
+    }
+
     try {
         const response = await fetch(`${API_URL}/players`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: playerName.value,
-                score: parseInt(playerScore.value) || 0
-            })
+            body: formData
         });
         
         const data = await response.json();
@@ -284,6 +301,7 @@ addPlayerForm.addEventListener('submit', async (e) => {
         if (data.success) {
             alert('Player added/updated successfully!');
             addPlayerForm.reset();
+            playerImagePreview.innerHTML = '';
             loadPlayers();
         } else {
             alert('Error: ' + data.error);
@@ -300,43 +318,42 @@ async function loadPlayers() {
         const response = await fetch(`${API_URL}/players`);
         const players = await response.json();
         
-        playersTbody.innerHTML = '';
+        playersList.innerHTML = '';
         
         if (players.length === 0) {
-            playersTbody.innerHTML = '<tr><td colspan="4" class="empty-state">No players yet.</td></tr>';
+            playersList.innerHTML = '<p class="empty-state">No players yet. Add players!</p>';
             return;
         }
         
-        // Sort by score descending
-        players.sort((a, b) => b.score - a.score);
-        
-        players.forEach((player, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${player.name}</td>
-                <td>${player.score}</td>
-                <td>
-                    <button class="btn btn-small btn-success" onclick="addPoints('${player.name}', 10)">+10</button>
-                    <button class="btn btn-small btn-success" onclick="addPoints('${player.name}', 5)">+5</button>
-                    <button class="btn btn-small btn-warning" onclick="addPoints('${player.name}', -5)">-5</button>
-                </td>
+        players.forEach(player => {
+            const playerCard = document.createElement('div');
+            playerCard.className = 'player-card';
+
+            const photoUrl = player.photo ? player.photo : 'https://via.placeholder.com/100?text=' + player.name.charAt(0);
+
+            playerCard.innerHTML = `
+                <img src="${photoUrl}" alt="${player.name}">
+                <h3>${player.name}</h3>
+                <div class="score">${player.score} pts</div>
+                <button class="btn btn-small btn-delete" onclick="deletePlayer(${player.id})">Delete</button>
             `;
-            playersTbody.appendChild(row);
+            playersList.appendChild(playerCard);
         });
     } catch (error) {
         console.error('Error loading players:', error);
-        playersTbody.innerHTML = '<tr><td colspan="4" class="error-state">Failed to load players!</td></tr>';
+        playersList.innerHTML = '<p class="error-state">Failed to load players!</p>';
     }
 }
 
-// Add points to player
-async function addPoints(name, points) {
+// Delete player
+async function deletePlayer(id) {
+    if (!confirm('Are you sure you want to delete this player?')) {
+        return;
+    }
+
     try {
-        const response = await fetch(`${API_URL}/players/${encodeURIComponent(name)}/score`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ points })
+        const response = await fetch(`${API_URL}/players/${id}`, {
+            method: 'DELETE'
         });
         
         const data = await response.json();
@@ -347,8 +364,8 @@ async function addPoints(name, points) {
             alert('Error: ' + data.error);
         }
     } catch (error) {
-        console.error('Error updating score:', error);
-        alert('Failed to update score!');
+        console.error('Error deleting player:', error);
+        alert('Failed to delete player!');
     }
 }
 
@@ -366,4 +383,4 @@ window.addEventListener('click', (e) => {
 // Make functions global
 window.editMovie = editMovie;
 window.deleteMovie = deleteMovie;
-window.addPoints = addPoints;
+window.deletePlayer = deletePlayer;

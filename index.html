@@ -3,84 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Quiz Show</title>
+    <title>Movie Quiz Night</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎬 Movie Quiz Show</h1>
-            <div class="header-buttons">
-                <a href="admin.html" class="btn btn-admin">Admin Panel</a>
-            </div>
-        </header>
-
-        <div id="game-container">
-            <div id="start-screen" class="screen active">
-                <h2>Welcome to Movie Quiz Show!</h2>
-                <p>Admin-controlled movie quiz with live scoring!</p>
-                
-                <div class="player-setup">
-                    <h3>Enter Player Name</h3>
-                    <input type="text" id="player-name-input" placeholder="Enter your name...">
-                    <button id="start-btn" class="btn btn-primary">Start Game</button>
-                </div>
-            </div>
-
-            <div id="game-screen" class="screen">
-                <div class="player-info">
-                    <div class="player-name">
-                        <span class="label">Player:</span>
-                        <span id="current-player">Guest</span>
-                    </div>
-                    <div class="player-score">
-                        <span class="label">Score:</span>
-                        <span id="player-score">0</span>
-                    </div>
-                </div>
-
-                <div class="movie-counter">
-                    <span>Movie <span id="current-movie">1</span> of <span id="total-movies">10</span></span>
-                </div>
-                
-                <div class="screenshot-container">
-                    <img id="movie-screenshot" src="" alt="Movie Screenshot">
-                </div>
-
-                <div class="movie-title">
-                    <h2 id="movie-title-display" style="display:none;">Movie Title</h2>
-                </div>
-
-                <div class="admin-controls">
-                    <h3>Admin Controls</h3>
-                    <div class="controls-grid">
-                        <button class="btn btn-correct" id="correct-btn">✓ Correct (+10)</button>
-                        <button class="btn btn-wrong" id="wrong-btn">✗ Wrong</button>
-                        <button class="btn btn-award" id="award-5-btn">Award +5</button>
-                        <button class="btn btn-award" id="award-20-btn">Award +20</button>
-                    </div>
-                    <div class="controls-grid">
-                        <button class="btn btn-reveal" id="reveal-btn">👁 Reveal Answer</button>
-                        <button class="btn btn-secondary" id="next-btn">Next Movie →</button>
-                    </div>
-                </div>
-
-                <div id="feedback" class="feedback"></div>
-            </div>
-
-            <div id="end-screen" class="screen">
-                <h2>Quiz Complete!</h2>
-                <div class="final-score">
-                    <p><span id="final-player-name">Player</span>'s final score:</p>
-                    <p class="score-value" id="final-score">0</p>
-                </div>
-                <div class="stats">
-                    <p>Movies shown: <span id="movies-count">0</span></p>
-                </div>
-                <button id="restart-btn" class="btn btn-primary">Start New Game</button>
-                <a href="admin.html" class="btn btn-secondary">Go to Admin Panel</a>
+    <!-- Landing Screen -->
+    <div id="start-screen" class="screen active">
+        <div class="landing-content">
+            <h1 class="glow-text">MOVIE QUIZ NIGHT</h1>
+            <p>The Ultimate Cinematic Challenge</p>
+            <button id="start-btn" class="btn btn-glow">START GAME</button>
+            <div class="admin-link-container">
+                <a href="admin.html" class="admin-link">Admin Panel</a>
             </div>
         </div>
+    </div>
+
+    <!-- Intro Video Screen -->
+    <div id="video-screen" class="screen">
+        <div class="video-container">
+            <video id="intro-video" width="100%" height="100%">
+                <source src="https://videos.pexels.com/video-files/5091624/5091624-hd_1920_1080_24fps.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <button id="skip-video-btn" class="btn btn-skip">Skip Intro</button>
+        </div>
+    </div>
+
+    <!-- Main Game Screen -->
+    <div id="game-screen" class="screen">
+        <div class="game-layout">
+            <!-- Left Side: Quiz Area -->
+            <div class="quiz-area">
+                <header class="game-header">
+                    <h2>MOVIE <span id="current-movie">1</span> / <span id="total-movies">?</span></h2>
+                </header>
+
+                <div class="screenshot-frame">
+                    <img id="movie-screenshot" src="" alt="Guess the Movie">
+                    <div id="reveal-overlay" class="reveal-overlay">
+                        <h2 id="movie-title-display">THE MATRIX</h2>
+                    </div>
+                </div>
+                
+                <div class="controller-panel">
+                    <button id="reveal-btn" class="btn btn-action">REVEAL ANSWER</button>
+                    <button id="next-btn" class="btn btn-action btn-primary">NEXT MOVIE</button>
+                </div>
+            </div>
+
+            <!-- Right Side: Players Area -->
+            <div class="players-area">
+                <h2>PLAYERS</h2>
+                <div id="active-players-grid" class="players-grid">
+                    <!-- Players inserted here by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="screen">
+        <h1>GAME OVER</h1>
+        <div id="winner-display" class="winner-display">
+            <!-- Winner info -->
+        </div>
+        <button id="restart-btn" class="btn btn-glow">NEW GAME</button>
     </div>
 
     <script src="script.js"></script>
