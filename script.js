@@ -129,9 +129,9 @@ function checkAnswer() {
     const movie = shuffledMovies[currentMovieIndex];
     const correctTitle = movie.title.toLowerCase();
     
-    // Check if answer matches title or any hints
+    // Check if answer matches title exactly or any hints exactly
     const isCorrect = userAnswer === correctTitle || 
-                     movie.hints.some(hint => userAnswer.includes(hint) || hint.includes(userAnswer));
+                     movie.hints.some(hint => userAnswer === hint);
 
     if (isCorrect) {
         handleCorrectAnswer();
@@ -162,7 +162,7 @@ function handleCorrectAnswer() {
     updateScore();
     updateStreak();
     
-    showFeedback(true, `Correct! +${points} points${streak > 1 ? ' (Streak x' + streak + ')' : ''}`);
+    showFeedback(true, `Correct! +${points} points${streak > 1 ? ` (Streak x${streak})` : ''}`);
 }
 
 // Handle wrong answer

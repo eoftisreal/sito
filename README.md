@@ -22,7 +22,7 @@ An interactive movie guessing game where you try to identify movies from screens
 ## Scoring System
 
 - **Correct Answer**: +10 points
-- **Streak Bonus**: +5 points per streak (e.g., 3rd correct in a row = 10 + 10 = 20 points)
+- **Streak Bonus**: +5 points per streak (e.g., 3rd correct in a row = 10 base + (3-1)*5 bonus = 20 points)
 - **Wrong Answer**: No points, streak resets to 0
 - **Skip**: No points, streak resets to 0
 
