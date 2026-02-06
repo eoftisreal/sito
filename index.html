@@ -32,6 +32,8 @@
 
     <!-- Main Game Screen -->
     <div id="game-screen" class="screen">
+        <button id="referee-btn" class="btn-floating">PICK REFEREE</button>
+
         <div class="game-layout">
             <!-- Left Side: Quiz Area -->
             <div class="quiz-area">
@@ -69,6 +71,15 @@
             <!-- Winner info -->
         </div>
         <button id="restart-btn" class="btn btn-glow">NEW GAME</button>
+    </div>
+
+    <!-- Referee Modal -->
+    <div id="referee-modal" class="modal">
+        <div class="modal-content referee-content">
+            <span class="close-modal">&times;</span>
+            <h2>THE REFEREE IS</h2>
+            <div id="referee-result"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>

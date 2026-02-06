@@ -29,6 +29,7 @@ const addPlayerForm = document.getElementById('add-player-form');
 const playerName = document.getElementById('player-name');
 const playerScore = document.getElementById('player-score');
 const playerPhoto = document.getElementById('player-photo');
+const playerSound = document.getElementById('player-sound');
 const playerImagePreview = document.getElementById('player-image-preview');
 const playersList = document.getElementById('players-list');
 
@@ -286,8 +287,13 @@ addPlayerForm.addEventListener('submit', async (e) => {
     const formData = new FormData();
     formData.append('name', playerName.value);
     formData.append('score', playerScore.value);
+
     if (playerPhoto.files[0]) {
         formData.append('photo', playerPhoto.files[0]);
+    }
+
+    if (playerSound.files[0]) {
+        formData.append('sound', playerSound.files[0]);
     }
 
     try {

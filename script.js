@@ -20,6 +20,7 @@ const skipVideoBtn = document.getElementById('skip-video-btn');
 const revealBtn = document.getElementById('reveal-btn');
 const nextBtn = document.getElementById('next-btn');
 const restartBtn = document.getElementById('restart-btn');
+const refereeBtn = document.getElementById('referee-btn');
 
 // Video
 const introVideo = document.getElementById('intro-video');
@@ -33,6 +34,11 @@ const totalMoviesNum = document.getElementById('total-movies');
 const activePlayersGrid = document.getElementById('active-players-grid');
 const winnerDisplay = document.getElementById('winner-display');
 
+// Referee Elements
+const refereeModal = document.getElementById('referee-modal');
+const refereeResult = document.getElementById('referee-result');
+const closeModal = document.querySelector('.close-modal');
+
 // Event Listeners
 startBtn.addEventListener('click', () => {
     startScreen.classList.remove('active');
@@ -42,6 +48,36 @@ startBtn.addEventListener('click', () => {
 
     // Auto-advance when video ends
     introVideo.onended = () => startGame();
+});
+
+// Referee Picker
+refereeBtn.addEventListener('click', () => {
+    if (players.length === 0) {
+        alert("No players available to pick from!");
+        return;
+    }
+
+    const randomPlayer = players[Math.floor(Math.random() * players.length)];
+    const photoUrl = randomPlayer.photo ? randomPlayer.photo : `https://ui-avatars.com/api/?name=${randomPlayer.name}&background=random`;
+
+    refereeResult.innerHTML = `
+        <div class="winner-card" style="box-shadow: none; border: none;">
+            <img src="${photoUrl}" class="winner-avatar">
+            <h1 class="glow-text" style="font-size: 3rem;">${randomPlayer.name}</h1>
+        </div>
+    `;
+
+    refereeModal.style.display = 'block';
+});
+
+closeModal.addEventListener('click', () => {
+    refereeModal.style.display = 'none';
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === refereeModal) {
+        refereeModal.style.display = 'none';
+    }
 });
 
 skipVideoBtn.addEventListener('click', () => {
@@ -112,10 +148,10 @@ async function loadPlayers() {
 
 function renderPlayers() {
     activePlayersGrid.innerHTML = '';
-    
+
     // Sort by score (Highest first)
     players.sort((a, b) => b.score - a.score);
-    
+
     players.forEach(player => {
         const card = document.createElement('div');
         card.className = 'player-card';
@@ -149,6 +185,17 @@ async function updateScore(name, points) {
         const player = players.find(p => p.name === name);
         if (player) {
             player.score += points;
+
+            // Play sound if points > 0 and player has sound
+            if (points > 0 && player.sound) {
+                try {
+                    const audio = new Audio(player.sound);
+                    audio.play().catch(e => console.log("Audio play failed:", e));
+                } catch (audioErr) {
+                    console.error("Error playing sound:", audioErr);
+                }
+            }
+
             renderPlayers();
         }
     } catch (e) {
