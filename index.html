@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Guessing Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Movie Guessing Game</h1>
+            <div class="score-board">
+                <div class="score">
+                    <span class="label">Score:</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="streak">
+                    <span class="label">Streak:</span>
+                    <span id="streak">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="game-container">
+            <div id="start-screen" class="screen active">
+                <h2>Welcome to Movie Guessing Game!</h2>
+                <p>Guess the movie from the screenshot and earn points!</p>
+                <ul class="rules">
+                    <li>🎯 Correct answer: +10 points</li>
+                    <li>🔥 Streak bonus: +5 points per streak</li>
+                    <li>❌ Wrong answer: Streak resets</li>
+                </ul>
+                <button id="start-btn" class="btn btn-primary">Start Game</button>
+            </div>
+
+            <div id="game-screen" class="screen">
+                <div class="movie-counter">
+                    <span>Movie <span id="current-movie">1</span> of <span id="total-movies">10</span></span>
+                </div>
+                
+                <div class="screenshot-container">
+                    <img id="movie-screenshot" src="" alt="Movie Screenshot">
+                </div>
+
+                <div class="question-container">
+                    <h3>What movie is this from?</h3>
+                    <input type="text" id="answer-input" placeholder="Enter movie title..." autocomplete="off">
+                    <button id="submit-btn" class="btn btn-primary">Submit Answer</button>
+                    <button id="skip-btn" class="btn btn-secondary">Skip</button>
+                </div>
+
+                <div id="feedback" class="feedback"></div>
+            </div>
+
+            <div id="end-screen" class="screen">
+                <h2>Game Over!</h2>
+                <div class="final-score">
+                    <p>Your final score:</p>
+                    <p class="score-value" id="final-score">0</p>
+                </div>
+                <div class="stats">
+                    <p>Correct answers: <span id="correct-count">0</span></p>
+                    <p>Wrong answers: <span id="wrong-count">0</span></p>
+                    <p>Best streak: <span id="best-streak">0</span></p>
+                </div>
+                <button id="restart-btn" class="btn btn-primary">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
