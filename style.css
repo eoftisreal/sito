@@ -28,37 +28,181 @@ header {
     margin-bottom: 30px;
     border-bottom: 3px solid #667eea;
     padding-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 h1 {
     color: #333;
     font-size: 2.5em;
-    margin-bottom: 15px;
+    flex: 1;
+    text-align: left;
 }
 
-.score-board {
+.header-buttons {
     display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-top: 15px;
+    gap: 10px;
 }
 
-.score, .streak {
+.btn-admin {
+    background: #9b59b6;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-admin:hover {
+    background: #8e44ad;
+    transform: translateY(-2px);
+}
+
+.player-info {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.player-name, .player-score {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.score .label, .streak .label {
+.player-name .label, .player-score .label {
     font-size: 0.9em;
     color: #666;
     margin-bottom: 5px;
 }
 
-.score span:last-child, .streak span:last-child {
-    font-size: 2em;
+.player-name span:last-child, .player-score span:last-child {
+    font-size: 1.8em;
     font-weight: bold;
     color: #667eea;
+}
+
+.player-setup {
+    max-width: 400px;
+    margin: 30px auto;
+}
+
+.player-setup h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.player-setup input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.player-setup input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.movie-title {
+    text-align: center;
+    margin: 20px 0;
+    min-height: 40px;
+}
+
+.movie-title h2 {
+    color: #667eea;
+    font-size: 1.8em;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-controls {
+    margin-top: 30px;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.admin-controls h3 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.controls-grid:last-child {
+    margin-bottom: 0;
+}
+
+.btn-correct {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-correct:hover {
+    background: #229954;
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+}
+
+.btn-wrong {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-wrong:hover {
+    background: #c0392b;
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+.btn-award {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-award:hover {
+    background: #e67e22;
+    box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+}
+
+.btn-reveal {
+    background: #3498db;
+    color: white;
+}
+
+.btn-reveal:hover {
+    background: #2980b9;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
 }
 
 .screen {
@@ -85,19 +229,6 @@ h1 {
     font-size: 1.2em;
     margin-bottom: 30px;
 }
-
-.rules {
-    list-style: none;
-    margin: 30px auto;
-    max-width: 400px;
-    text-align: left;
-}
-
-.rules li {
-    padding: 15px;
-    background: #f5f5f5;
-    margin-bottom: 10px;
-    border-radius: 10px;
     font-size: 1.1em;
     color: #333;
 }
@@ -160,6 +291,7 @@ h1 {
 .question-container {
     text-align: center;
     margin-top: 30px;
+    display: none; /* Hidden as we removed manual guessing */
 }
 
 .question-container h3 {
@@ -261,20 +393,32 @@ h1 {
         padding: 20px;
     }
     
-    h1 {
-        font-size: 1.8em;
+    header {
+        flex-direction: column;
+        gap: 15px;
     }
     
-    .score-board {
-        gap: 20px;
+    h1 {
+        font-size: 1.8em;
+        text-align: center;
+    }
+    
+    .header-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .player-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .controls-grid {
+        grid-template-columns: 1fr;
     }
     
     .btn {
         padding: 12px 30px;
-        font-size: 1em;
-    }
-    
-    #answer-input {
         font-size: 1em;
     }
 }

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Movie Game</title>
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <h1>🔐 Admin Login</h1>
+            <form id="login-form">
+                <input type="password" id="admin-password" placeholder="Enter admin password" required>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div id="login-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="screen">
+        <header>
+            <h1>🎬 Admin Dashboard</h1>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-secondary">View Game</a>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="movies">Movies Management</button>
+                <button class="tab-btn" data-tab="players">Players Management</button>
+            </div>
+
+            <!-- Movies Management Tab -->
+            <div id="movies-tab" class="tab-content active">
+                <div class="section">
+                    <h2>Add New Movie</h2>
+                    <form id="add-movie-form" class="form-card">
+                        <div class="form-group">
+                            <label for="movie-title">Movie Title *</label>
+                            <input type="text" id="movie-title" required placeholder="e.g., The Matrix">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="movie-screenshot">Upload Screenshot *</label>
+                            <input type="file" id="movie-screenshot" accept="image/*" required>
+                            <div id="image-preview" class="image-preview"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="movie-hints">Hints (comma-separated)</label>
+                            <input type="text" id="movie-hints" placeholder="e.g., matrix, neo, keanu">
+                            <small>Enter keywords that might help identify the movie</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Add Movie</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2>Existing Movies</h2>
+                    <div id="movies-list" class="movies-grid"></div>
+                </div>
+            </div>
+
+            <!-- Players Management Tab -->
+            <div id="players-tab" class="tab-content">
+                <div class="section">
+                    <h2>Add/Update Player</h2>
+                    <form id="add-player-form" class="form-card">
+                        <div class="form-group">
+                            <label for="player-name">Player Name *</label>
+                            <input type="text" id="player-name" required placeholder="Enter player name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="player-score">Initial Score</label>
+                            <input type="number" id="player-score" value="0" min="0">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Add/Update Player</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2>Players Leaderboard</h2>
+                    <div id="players-list" class="players-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player Name</th>
+                                    <th>Score</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="players-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Movie Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Movie</h2>
+            <form id="edit-movie-form">
+                <input type="hidden" id="edit-movie-id">
+                
+                <div class="form-group">
+                    <label for="edit-movie-title">Movie Title *</label>
+                    <input type="text" id="edit-movie-title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-movie-screenshot">Update Screenshot (optional)</label>
+                    <input type="file" id="edit-movie-screenshot" accept="image/*">
+                    <div id="edit-image-preview" class="image-preview"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-movie-hints">Hints (comma-separated)</label>
+                    <input type="text" id="edit-movie-hints">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Movie</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>

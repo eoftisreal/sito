@@ -3,38 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Guessing Game</title>
+    <title>Movie Quiz Show</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🎬 Movie Guessing Game</h1>
-            <div class="score-board">
-                <div class="score">
-                    <span class="label">Score:</span>
-                    <span id="score">0</span>
-                </div>
-                <div class="streak">
-                    <span class="label">Streak:</span>
-                    <span id="streak">0</span>
-                </div>
+            <h1>🎬 Movie Quiz Show</h1>
+            <div class="header-buttons">
+                <a href="admin.html" class="btn btn-admin">Admin Panel</a>
             </div>
         </header>
 
         <div id="game-container">
             <div id="start-screen" class="screen active">
-                <h2>Welcome to Movie Guessing Game!</h2>
-                <p>Guess the movie from the screenshot and earn points!</p>
-                <ul class="rules">
-                    <li>🎯 Correct answer: +10 points</li>
-                    <li>🔥 Streak bonus: +5 points per streak</li>
-                    <li>❌ Wrong answer: Streak resets</li>
-                </ul>
-                <button id="start-btn" class="btn btn-primary">Start Game</button>
+                <h2>Welcome to Movie Quiz Show!</h2>
+                <p>Admin-controlled movie quiz with live scoring!</p>
+                
+                <div class="player-setup">
+                    <h3>Enter Player Name</h3>
+                    <input type="text" id="player-name-input" placeholder="Enter your name...">
+                    <button id="start-btn" class="btn btn-primary">Start Game</button>
+                </div>
             </div>
 
             <div id="game-screen" class="screen">
+                <div class="player-info">
+                    <div class="player-name">
+                        <span class="label">Player:</span>
+                        <span id="current-player">Guest</span>
+                    </div>
+                    <div class="player-score">
+                        <span class="label">Score:</span>
+                        <span id="player-score">0</span>
+                    </div>
+                </div>
+
                 <div class="movie-counter">
                     <span>Movie <span id="current-movie">1</span> of <span id="total-movies">10</span></span>
                 </div>
@@ -43,28 +47,38 @@
                     <img id="movie-screenshot" src="" alt="Movie Screenshot">
                 </div>
 
-                <div class="question-container">
-                    <h3>What movie is this from?</h3>
-                    <input type="text" id="answer-input" placeholder="Enter movie title..." autocomplete="off">
-                    <button id="submit-btn" class="btn btn-primary">Submit Answer</button>
-                    <button id="skip-btn" class="btn btn-secondary">Skip</button>
+                <div class="movie-title">
+                    <h2 id="movie-title-display" style="display:none;">Movie Title</h2>
+                </div>
+
+                <div class="admin-controls">
+                    <h3>Admin Controls</h3>
+                    <div class="controls-grid">
+                        <button class="btn btn-correct" id="correct-btn">✓ Correct (+10)</button>
+                        <button class="btn btn-wrong" id="wrong-btn">✗ Wrong</button>
+                        <button class="btn btn-award" id="award-5-btn">Award +5</button>
+                        <button class="btn btn-award" id="award-20-btn">Award +20</button>
+                    </div>
+                    <div class="controls-grid">
+                        <button class="btn btn-reveal" id="reveal-btn">👁 Reveal Answer</button>
+                        <button class="btn btn-secondary" id="next-btn">Next Movie →</button>
+                    </div>
                 </div>
 
                 <div id="feedback" class="feedback"></div>
             </div>
 
             <div id="end-screen" class="screen">
-                <h2>Game Over!</h2>
+                <h2>Quiz Complete!</h2>
                 <div class="final-score">
-                    <p>Your final score:</p>
+                    <p><span id="final-player-name">Player</span>'s final score:</p>
                     <p class="score-value" id="final-score">0</p>
                 </div>
                 <div class="stats">
-                    <p>Correct answers: <span id="correct-count">0</span></p>
-                    <p>Wrong answers: <span id="wrong-count">0</span></p>
-                    <p>Best streak: <span id="best-streak">0</span></p>
+                    <p>Movies shown: <span id="movies-count">0</span></p>
                 </div>
-                <button id="restart-btn" class="btn btn-primary">Play Again</button>
+                <button id="restart-btn" class="btn btn-primary">Start New Game</button>
+                <a href="admin.html" class="btn btn-secondary">Go to Admin Panel</a>
             </div>
         </div>
     </div>

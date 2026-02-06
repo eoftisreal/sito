@@ -1,194 +1,160 @@
-// Movie database with placeholder images (using placeholder service)
-const movies = [
-    {
-        title: "The Matrix",
-        screenshot: "https://via.placeholder.com/800x450/000000/00FF00?text=The+Matrix",
-        hints: ["matrix", "neo", "keanu"]
-    },
-    {
-        title: "Inception",
-        screenshot: "https://via.placeholder.com/800x450/1a1a2e/16a085?text=Inception",
-        hints: ["inception", "dream", "leo"]
-    },
-    {
-        title: "Titanic",
-        screenshot: "https://via.placeholder.com/800x450/1e3a8a/93c5fd?text=Titanic",
-        hints: ["titanic", "ship", "rose"]
-    },
-    {
-        title: "The Godfather",
-        screenshot: "https://via.placeholder.com/800x450/1c1c1c/d4af37?text=The+Godfather",
-        hints: ["godfather", "vito", "corleone"]
-    },
-    {
-        title: "Pulp Fiction",
-        screenshot: "https://via.placeholder.com/800x450/000000/ff0000?text=Pulp+Fiction",
-        hints: ["pulp", "fiction", "vincent"]
-    },
-    {
-        title: "Forrest Gump",
-        screenshot: "https://via.placeholder.com/800x450/8b4513/ffffff?text=Forrest+Gump",
-        hints: ["forrest", "gump", "jenny"]
-    },
-    {
-        title: "The Dark Knight",
-        screenshot: "https://via.placeholder.com/800x450/1a1a1a/ffd700?text=The+Dark+Knight",
-        hints: ["dark", "knight", "batman", "joker"]
-    },
-    {
-        title: "Avatar",
-        screenshot: "https://via.placeholder.com/800x450/0f4c81/39ff14?text=Avatar",
-        hints: ["avatar", "pandora", "jake"]
-    },
-    {
-        title: "Star Wars",
-        screenshot: "https://via.placeholder.com/800x450/000000/FFE81F?text=Star+Wars",
-        hints: ["star", "wars", "luke", "vader"]
-    },
-    {
-        title: "Jurassic Park",
-        screenshot: "https://via.placeholder.com/800x450/1a4d2e/ff0000?text=Jurassic+Park",
-        hints: ["jurassic", "park", "dinosaur"]
-    }
-];
+// API Configuration - Use relative URL to work in both local and codespace environments
+const API_URL = window.location.origin.includes('localhost') 
+    ? 'http://localhost:3000/api' 
+    : `${window.location.origin}/api`;
 
 // Game state
+let movies = [];
 let currentMovieIndex = 0;
-let score = 0;
-let streak = 0;
-let bestStreak = 0;
-let correctAnswers = 0;
-let wrongAnswers = 0;
-let shuffledMovies = [];
+let playerName = 'Guest';
+let playerScore = 0;
+let moviesShown = 0;
 
 // DOM elements
 const startScreen = document.getElementById('start-screen');
 const gameScreen = document.getElementById('game-screen');
 const endScreen = document.getElementById('end-screen');
 const startBtn = document.getElementById('start-btn');
-const submitBtn = document.getElementById('submit-btn');
-const skipBtn = document.getElementById('skip-btn');
-const restartBtn = document.getElementById('restart-btn');
-const answerInput = document.getElementById('answer-input');
+const playerNameInput = document.getElementById('player-name-input');
+const currentPlayerElement = document.getElementById('current-player');
+const playerScoreElement = document.getElementById('player-score');
 const movieScreenshot = document.getElementById('movie-screenshot');
-const scoreElement = document.getElementById('score');
-const streakElement = document.getElementById('streak');
+const movieTitleDisplay = document.getElementById('movie-title-display');
 const currentMovieElement = document.getElementById('current-movie');
 const totalMoviesElement = document.getElementById('total-movies');
 const feedbackElement = document.getElementById('feedback');
 const finalScoreElement = document.getElementById('final-score');
-const correctCountElement = document.getElementById('correct-count');
-const wrongCountElement = document.getElementById('wrong-count');
-const bestStreakElement = document.getElementById('best-streak');
+const finalPlayerNameElement = document.getElementById('final-player-name');
+const moviesCountElement = document.getElementById('movies-count');
+const restartBtn = document.getElementById('restart-btn');
+
+// Admin control buttons
+const correctBtn = document.getElementById('correct-btn');
+const wrongBtn = document.getElementById('wrong-btn');
+const award5Btn = document.getElementById('award-5-btn');
+const award20Btn = document.getElementById('award-20-btn');
+const revealBtn = document.getElementById('reveal-btn');
+const nextBtn = document.getElementById('next-btn');
+
+// Load movies from API
+async function loadMoviesFromAPI() {
+    try {
+        const response = await fetch(`${API_URL}/movies`);
+        movies = await response.json();
+        
+        if (movies.length === 0) {
+            alert('No movies available! Please add movies from the admin panel.');
+            return false;
+        }
+        
+        // Shuffle movies
+        movies = movies.sort(() => Math.random() - 0.5);
+        return true;
+    } catch (error) {
+        console.error('Error loading movies:', error);
+        alert('Failed to load movies! Make sure the server is running on port 3000.');
+        return false;
+    }
+}
 
 // Initialize game
 function initGame() {
-    shuffledMovies = [...movies].sort(() => Math.random() - 0.5);
     currentMovieIndex = 0;
-    score = 0;
-    streak = 0;
-    bestStreak = 0;
-    correctAnswers = 0;
-    wrongAnswers = 0;
-    updateScore();
-    updateStreak();
+    playerScore = 0;
+    moviesShown = 0;
+    updatePlayerScore();
 }
 
 // Start game
-function startGame() {
+async function startGame() {
+    const name = playerNameInput.value.trim();
+    
+    if (!name) {
+        alert('Please enter your name!');
+        return;
+    }
+    
+    playerName = name;
+    
+    // Load movies from API
+    const loaded = await loadMoviesFromAPI();
+    if (!loaded) return;
+    
     initGame();
+    currentPlayerElement.textContent = playerName;
     startScreen.classList.remove('active');
     gameScreen.classList.add('active');
-    totalMoviesElement.textContent = shuffledMovies.length;
+    totalMoviesElement.textContent = movies.length;
     loadMovie();
 }
 
 // Load current movie
 function loadMovie() {
-    if (currentMovieIndex >= shuffledMovies.length) {
+    if (currentMovieIndex >= movies.length) {
         endGame();
         return;
     }
 
-    const movie = shuffledMovies[currentMovieIndex];
+    const movie = movies[currentMovieIndex];
     movieScreenshot.src = movie.screenshot;
     currentMovieElement.textContent = currentMovieIndex + 1;
-    answerInput.value = '';
+    movieTitleDisplay.style.display = 'none';
+    movieTitleDisplay.textContent = movie.title;
     feedbackElement.classList.remove('show', 'correct', 'wrong');
-    answerInput.focus();
-}
-
-// Check answer
-function checkAnswer() {
-    const userAnswer = answerInput.value.trim().toLowerCase();
-    
-    if (!userAnswer) {
-        return;
-    }
-
-    const movie = shuffledMovies[currentMovieIndex];
-    const correctTitle = movie.title.toLowerCase();
-    
-    // Check if answer matches title exactly or any hints exactly
-    const isCorrect = userAnswer === correctTitle || 
-                     movie.hints.some(hint => userAnswer === hint);
-
-    if (isCorrect) {
-        handleCorrectAnswer();
-    } else {
-        handleWrongAnswer();
-    }
-
-    // Move to next movie after delay
-    setTimeout(() => {
-        currentMovieIndex++;
-        loadMovie();
-    }, 2000);
+    moviesShown++;
 }
 
 // Handle correct answer
-function handleCorrectAnswer() {
-    correctAnswers++;
-    streak++;
+async function handleCorrect() {
+    const points = 10;
+    playerScore += points;
+    updatePlayerScore();
     
-    if (streak > bestStreak) {
-        bestStreak = streak;
-    }
+    // Update score in backend
+    await updatePlayerScoreAPI(playerName, points);
     
-    // Calculate points: base 10 + streak bonus
-    const points = 10 + (streak - 1) * 5;
-    score += points;
-    
-    updateScore();
-    updateStreak();
-    
-    showFeedback(true, `Correct! +${points} points${streak > 1 ? ` (Streak x${streak})` : ''}`);
+    showFeedback(true, `Correct! +${points} points`);
 }
 
 // Handle wrong answer
-function handleWrongAnswer() {
-    wrongAnswers++;
-    streak = 0;
-    
-    updateStreak();
-    
-    const correctTitle = shuffledMovies[currentMovieIndex].title;
-    showFeedback(false, `Wrong! The correct answer was "${correctTitle}"`);
+function handleWrong() {
+    showFeedback(false, `Wrong answer!`);
 }
 
-// Skip movie
-function skipMovie() {
-    wrongAnswers++;
-    streak = 0;
-    updateStreak();
+// Award custom points
+async function awardPoints(points) {
+    playerScore += points;
+    updatePlayerScore();
     
-    const correctTitle = shuffledMovies[currentMovieIndex].title;
-    showFeedback(false, `Skipped! The answer was "${correctTitle}"`);
+    // Update score in backend
+    await updatePlayerScoreAPI(playerName, points);
     
-    setTimeout(() => {
-        currentMovieIndex++;
-        loadMovie();
-    }, 2000);
+    showFeedback(true, `Awarded ${points > 0 ? '+' : ''}${points} points!`);
+}
+
+// Reveal movie title
+function revealAnswer() {
+    movieTitleDisplay.style.display = 'block';
+    showFeedback(true, 'Answer revealed!');
+}
+
+// Next movie
+function nextMovie() {
+    currentMovieIndex++;
+    loadMovie();
+}
+
+// Update player score in API
+async function updatePlayerScoreAPI(name, points) {
+    try {
+        await fetch(`${API_URL}/players/${encodeURIComponent(name)}/score`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ points })
+        });
+    } catch (error) {
+        console.error('Error updating score:', error);
+    }
 }
 
 // Show feedback
@@ -198,14 +164,9 @@ function showFeedback(isCorrect, message) {
     feedbackElement.classList.add(isCorrect ? 'correct' : 'wrong');
 }
 
-// Update score display
-function updateScore() {
-    scoreElement.textContent = score;
-}
-
-// Update streak display
-function updateStreak() {
-    streakElement.textContent = streak;
+// Update player score display
+function updatePlayerScore() {
+    playerScoreElement.textContent = playerScore;
 }
 
 // End game
@@ -213,27 +174,31 @@ function endGame() {
     gameScreen.classList.remove('active');
     endScreen.classList.add('active');
     
-    finalScoreElement.textContent = score;
-    correctCountElement.textContent = correctAnswers;
-    wrongCountElement.textContent = wrongAnswers;
-    bestStreakElement.textContent = bestStreak;
+    finalPlayerNameElement.textContent = playerName;
+    finalScoreElement.textContent = playerScore;
+    moviesCountElement.textContent = moviesShown;
 }
 
 // Restart game
 function restartGame() {
     endScreen.classList.remove('active');
     startScreen.classList.add('active');
+    playerNameInput.value = '';
 }
 
 // Event listeners
 startBtn.addEventListener('click', startGame);
-submitBtn.addEventListener('click', checkAnswer);
-skipBtn.addEventListener('click', skipMovie);
+correctBtn.addEventListener('click', handleCorrect);
+wrongBtn.addEventListener('click', handleWrong);
+award5Btn.addEventListener('click', () => awardPoints(5));
+award20Btn.addEventListener('click', () => awardPoints(20));
+revealBtn.addEventListener('click', revealAnswer);
+nextBtn.addEventListener('click', nextMovie);
 restartBtn.addEventListener('click', restartGame);
 
-// Allow Enter key to submit answer
-answerInput.addEventListener('keypress', (e) => {
+// Allow Enter key to start game
+playerNameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        checkAnswer();
+        startGame();
     }
 });
