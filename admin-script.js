@@ -19,10 +19,16 @@ const tabContents = document.querySelectorAll('.tab-content');
 // Movies elements
 const addMovieForm = document.getElementById('add-movie-form');
 const movieTitle = document.getElementById('movie-title');
+const movieCategory = document.getElementById('movie-category');
+const movieDialogue = document.getElementById('movie-dialogue');
 const movieScreenshot = document.getElementById('movie-screenshot');
 const movieHints = document.getElementById('movie-hints');
 const imagePreview = document.getElementById('image-preview');
 const moviesList = document.getElementById('movies-list');
+
+// Form Groups for Toggle
+const screenshotGroup = document.getElementById('screenshot-group');
+const dialogueGroup = document.getElementById('dialogue-group');
 
 // Players elements
 const addPlayerForm = document.getElementById('add-player-form');
@@ -38,9 +44,13 @@ const editModal = document.getElementById('edit-modal');
 const editMovieForm = document.getElementById('edit-movie-form');
 const editMovieId = document.getElementById('edit-movie-id');
 const editMovieTitle = document.getElementById('edit-movie-title');
+const editMovieCategory = document.getElementById('edit-movie-category');
+const editMovieDialogue = document.getElementById('edit-movie-dialogue');
 const editMovieScreenshot = document.getElementById('edit-movie-screenshot');
 const editMovieHints = document.getElementById('edit-movie-hints');
 const editImagePreview = document.getElementById('edit-image-preview');
+const editScreenshotGroup = document.getElementById('edit-screenshot-group');
+const editDialogueGroup = document.getElementById('edit-dialogue-group');
 const closeModal = document.querySelector('.close');
 
 // Login
@@ -99,6 +109,31 @@ tabBtns.forEach(btn => {
     });
 });
 
+// Toggle between Screenshot and Dialogue
+movieCategory.addEventListener('change', () => {
+    if (movieCategory.value === 'Dialogue') {
+        screenshotGroup.classList.add('hidden');
+        dialogueGroup.classList.remove('hidden');
+        movieScreenshot.removeAttribute('required');
+        movieDialogue.setAttribute('required', 'true');
+    } else {
+        screenshotGroup.classList.remove('hidden');
+        dialogueGroup.classList.add('hidden');
+        movieScreenshot.setAttribute('required', 'true');
+        movieDialogue.removeAttribute('required');
+    }
+});
+
+editMovieCategory.addEventListener('change', () => {
+    if (editMovieCategory.value === 'Dialogue') {
+        editScreenshotGroup.classList.add('hidden');
+        editDialogueGroup.classList.remove('hidden');
+    } else {
+        editScreenshotGroup.classList.remove('hidden');
+        editDialogueGroup.classList.add('hidden');
+    }
+});
+
 // Image preview for add form
 movieScreenshot.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -129,8 +164,14 @@ addMovieForm.addEventListener('submit', async (e) => {
     
     const formData = new FormData();
     formData.append('title', movieTitle.value);
+    formData.append('category', movieCategory.value);
     formData.append('hints', movieHints.value);
-    formData.append('screenshot', movieScreenshot.files[0]);
+
+    if (movieCategory.value === 'Dialogue') {
+        formData.append('dialogue', movieDialogue.value);
+    } else {
+        formData.append('screenshot', movieScreenshot.files[0]);
+    }
     
     try {
         const response = await fetch(`${API_URL}/movies`, {
@@ -170,10 +211,19 @@ async function loadMovies() {
         movies.forEach(movie => {
             const movieCard = document.createElement('div');
             movieCard.className = 'movie-card';
+
+            let visual = '';
+            if (movie.category === 'Dialogue') {
+                visual = `<div class="dialogue-preview">"${movie.dialogue}"</div>`;
+            } else {
+                visual = `<img src="${movie.screenshot}" alt="${movie.title}">`;
+            }
+
             movieCard.innerHTML = `
-                <img src="${movie.screenshot}" alt="${movie.title}">
+                ${visual}
                 <div class="movie-info">
                     <h3>${movie.title}</h3>
+                    <span class="category-badge">${movie.category}</span>
                     <p class="hints">Hints: ${movie.hints.join(', ') || 'None'}</p>
                     <div class="movie-actions">
                         <button class="btn btn-small btn-edit" onclick="editMovie(${movie.id})">Edit</button>
@@ -197,8 +247,19 @@ async function editMovie(id) {
         
         editMovieId.value = movie.id;
         editMovieTitle.value = movie.title;
+        editMovieCategory.value = movie.category || 'Hollywood';
+        editMovieDialogue.value = movie.dialogue || '';
         editMovieHints.value = movie.hints.join(', ');
-        editImagePreview.innerHTML = `<img src="${movie.screenshot}" alt="${movie.title}">`;
+
+        // Trigger change to set correct visibility
+        const event = new Event('change');
+        editMovieCategory.dispatchEvent(event);
+
+        if (movie.category !== 'Dialogue') {
+            editImagePreview.innerHTML = `<img src="${movie.screenshot}" alt="${movie.title}">`;
+        } else {
+            editImagePreview.innerHTML = '';
+        }
         
         editModal.style.display = 'block';
     } catch (error) {
@@ -214,9 +275,12 @@ editMovieForm.addEventListener('submit', async (e) => {
     const movieId = editMovieId.value;
     const formData = new FormData();
     formData.append('title', editMovieTitle.value);
+    formData.append('category', editMovieCategory.value);
     formData.append('hints', editMovieHints.value);
     
-    if (editMovieScreenshot.files[0]) {
+    if (editMovieCategory.value === 'Dialogue') {
+        formData.append('dialogue', editMovieDialogue.value);
+    } else if (editMovieScreenshot.files[0]) {
         formData.append('screenshot', editMovieScreenshot.files[0]);
     }
     
