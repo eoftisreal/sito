@@ -33,14 +33,17 @@ const storage = multer.diskStorage({
 const upload = multer({ 
     storage: storage,
     fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif|webp/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
+        const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
+        const allowedAudioTypes = /mp3|wav|ogg|mpeg/;
+        const extname = path.extname(file.originalname).toLowerCase();
         
-        if (mimetype && extname) {
+        const isImage = allowedImageTypes.test(extname) || allowedImageTypes.test(file.mimetype);
+        const isAudio = allowedAudioTypes.test(extname) || allowedAudioTypes.test(file.mimetype);
+
+        if (isImage || isAudio) {
             return cb(null, true);
         } else {
-            cb(new Error('Only image files are allowed!'));
+            cb(new Error('Only image and audio files are allowed!'));
         }
     }
 });
@@ -216,7 +219,7 @@ app.get('/api/players', (req, res) => {
 });
 
 // Add or update player
-app.post('/api/players', upload.single('photo'), (req, res) => {
+app.post('/api/players', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'sound', maxCount: 1 }]), (req, res) => {
     try {
         const data = readData();
         const { name, score } = req.body;
@@ -226,17 +229,28 @@ app.post('/api/players', upload.single('photo'), (req, res) => {
         }
         
         const existingPlayerIndex = data.players.findIndex(p => p.name === name);
+        const files = req.files || {};
         
         if (existingPlayerIndex !== -1) {
             // Update existing player
             if (score !== undefined) data.players[existingPlayerIndex].score = parseInt(score);
-            if (req.file) {
-                // Remove old photo if exists
+
+            // Update photo
+            if (files.photo && files.photo[0]) {
                 if (data.players[existingPlayerIndex].photo && data.players[existingPlayerIndex].photo.startsWith('/uploads/')) {
                     const oldPath = path.join(__dirname, data.players[existingPlayerIndex].photo);
                     if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
                 }
-                data.players[existingPlayerIndex].photo = `/uploads/${req.file.filename}`;
+                data.players[existingPlayerIndex].photo = `/uploads/${files.photo[0].filename}`;
+            }
+
+            // Update sound
+            if (files.sound && files.sound[0]) {
+                if (data.players[existingPlayerIndex].sound && data.players[existingPlayerIndex].sound.startsWith('/uploads/')) {
+                    const oldPath = path.join(__dirname, data.players[existingPlayerIndex].sound);
+                    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+                }
+                data.players[existingPlayerIndex].sound = `/uploads/${files.sound[0].filename}`;
             }
         } else {
             // Create new player
@@ -244,7 +258,8 @@ app.post('/api/players', upload.single('photo'), (req, res) => {
                 id: data.players.length > 0 ? Math.max(...data.players.map(p => p.id)) + 1 : 1,
                 name: name,
                 score: parseInt(score) || 0,
-                photo: req.file ? `/uploads/${req.file.filename}` : null
+                photo: files.photo && files.photo[0] ? `/uploads/${files.photo[0].filename}` : null,
+                sound: files.sound && files.sound[0] ? `/uploads/${files.sound[0].filename}` : null
             });
         }
         
@@ -322,7 +337,7 @@ app.put('/api/players/:name/score', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`Admin panel: http://localhost:${PORT}/admin.html`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Admin panel: http://0.0.0.0:${PORT}/admin.html`);
 });
