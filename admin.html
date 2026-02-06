@@ -47,11 +47,28 @@
                         </div>
                         
                         <div class="form-group">
+                            <label for="movie-category">Category *</label>
+                            <select id="movie-category" required>
+                                <option value="Hollywood">Hollywood</option>
+                                <option value="Bollywood">Bollywood</option>
+                                <option value="Guess the Eyes">Guess the Eyes</option>
+                                <option value="Dialogue">Guess by Dialogue</option>
+                            </select>
+                        </div>
+
+                        <!-- Screenshot Upload Group (Visible for non-dialogue categories) -->
+                        <div class="form-group" id="screenshot-group">
                             <label for="movie-screenshot">Upload Screenshot *</label>
-                            <input type="file" id="movie-screenshot" accept="image/*" required>
+                            <input type="file" id="movie-screenshot" accept="image/*">
                             <div id="image-preview" class="image-preview"></div>
                         </div>
                         
+                        <!-- Dialogue Text Group (Visible only for Dialogue category) -->
+                        <div class="form-group hidden" id="dialogue-group">
+                            <label for="movie-dialogue">Dialogue Quote *</label>
+                            <textarea id="movie-dialogue" rows="4" placeholder="Enter the famous dialogue..."></textarea>
+                        </div>
+
                         <div class="form-group">
                             <label for="movie-hints">Hints (comma-separated)</label>
                             <input type="text" id="movie-hints" placeholder="e.g., matrix, neo, keanu">
@@ -121,11 +138,26 @@
                     <label for="edit-movie-title">Movie Title *</label>
                     <input type="text" id="edit-movie-title" required>
                 </div>
-                
+
                 <div class="form-group">
+                    <label for="edit-movie-category">Category *</label>
+                    <select id="edit-movie-category" required>
+                        <option value="Hollywood">Hollywood</option>
+                        <option value="Bollywood">Bollywood</option>
+                        <option value="Guess the Eyes">Guess the Eyes</option>
+                        <option value="Dialogue">Guess by Dialogue</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="edit-screenshot-group">
                     <label for="edit-movie-screenshot">Update Screenshot (optional)</label>
                     <input type="file" id="edit-movie-screenshot" accept="image/*">
                     <div id="edit-image-preview" class="image-preview"></div>
+                </div>
+
+                <div class="form-group hidden" id="edit-dialogue-group">
+                    <label for="edit-movie-dialogue">Dialogue Quote</label>
+                    <textarea id="edit-movie-dialogue" rows="4"></textarea>
                 </div>
                 
                 <div class="form-group">

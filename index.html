@@ -39,6 +39,9 @@
             <div class="quiz-area">
                 <header class="game-header">
                     <h2>MOVIE <span id="current-movie">1</span> / <span id="total-movies">?</span></h2>
+                    <div class="timer-container">
+                        <div id="timer-display">15</div>
+                    </div>
                 </header>
 
                 <div class="screenshot-frame">
@@ -49,6 +52,7 @@
                 </div>
                 
                 <div class="controller-panel">
+                    <button id="start-timer-btn" class="btn btn-action btn-timer">START TIMER</button>
                     <button id="reveal-btn" class="btn btn-action">REVEAL ANSWER</button>
                     <button id="next-btn" class="btn btn-action btn-primary">NEXT MOVIE</button>
                 </div>
@@ -72,6 +76,9 @@
         </div>
         <button id="restart-btn" class="btn btn-glow">NEW GAME</button>
     </div>
+
+    <!-- Confetti Canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <!-- Referee Modal -->
     <div id="referee-modal" class="modal">

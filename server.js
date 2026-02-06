@@ -127,7 +127,7 @@ app.get('/api/movies/:id', (req, res) => {
 app.post('/api/movies', upload.single('screenshot'), (req, res) => {
     try {
         const data = readData();
-        const { title, hints } = req.body;
+        const { title, hints, category, dialogue } = req.body;
         
         if (!title) {
             return res.status(400).json({ error: 'Title is required' });
@@ -136,6 +136,8 @@ app.post('/api/movies', upload.single('screenshot'), (req, res) => {
         const newMovie = {
             id: data.movies.length > 0 ? Math.max(...data.movies.map(m => m.id)) + 1 : 1,
             title: title,
+            category: category || 'Hollywood',
+            dialogue: dialogue || '',
             screenshot: req.file ? `/uploads/${req.file.filename}` : '',
             hints: hints ? hints.split(',').map(h => h.trim().toLowerCase()) : []
         };
@@ -163,9 +165,12 @@ app.put('/api/movies/:id', upload.single('screenshot'), (req, res) => {
             return res.status(404).json({ error: 'Movie not found' });
         }
         
-        const { title, hints } = req.body;
+        const { title, hints, category, dialogue } = req.body;
         
         if (title) data.movies[movieIndex].title = title;
+        if (category) data.movies[movieIndex].category = category;
+        // Allow dialogue to be empty string if needed, but only update if provided or explicitly empty
+        if (dialogue !== undefined) data.movies[movieIndex].dialogue = dialogue;
         if (hints) data.movies[movieIndex].hints = hints.split(',').map(h => h.trim().toLowerCase());
         if (req.file) data.movies[movieIndex].screenshot = `/uploads/${req.file.filename}`;
         
