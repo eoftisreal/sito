@@ -57,18 +57,48 @@ refereeBtn.addEventListener('click', () => {
         return;
     }
 
+    refereeModal.style.display = 'flex'; // Changed to flex for centering
+    refereeModal.classList.add('active'); // Add active class for blur transition
+
+    let counter = 0;
+    const totalIterations = 30; // Number of shuffles
+    const intervalTime = 100; // Speed of shuffle
+
+    const shuffleInterval = setInterval(() => {
+        const randomPlayer = players[Math.floor(Math.random() * players.length)];
+        const photoUrl = randomPlayer.photo ? randomPlayer.photo : `https://ui-avatars.com/api/?name=${randomPlayer.name}&background=random`;
+
+        refereeResult.innerHTML = `
+            <div class="winner-card referee-card-anim">
+                <img src="${photoUrl}" class="winner-avatar referee-avatar-anim">
+                <h1 class="glow-text referee-name-anim">${randomPlayer.name}</h1>
+            </div>
+        `;
+
+        counter++;
+        if (counter >= totalIterations) {
+            clearInterval(shuffleInterval);
+            finalizeReferee();
+        }
+    }, intervalTime);
+});
+
+function finalizeReferee() {
     const randomPlayer = players[Math.floor(Math.random() * players.length)];
     const photoUrl = randomPlayer.photo ? randomPlayer.photo : `https://ui-avatars.com/api/?name=${randomPlayer.name}&background=random`;
 
     refereeResult.innerHTML = `
-        <div class="winner-card" style="box-shadow: none; border: none;">
-            <img src="${photoUrl}" class="winner-avatar">
-            <h1 class="glow-text" style="font-size: 3rem;">${randomPlayer.name}</h1>
+        <div class="winner-card referee-card-final">
+            <div class="referee-badge">OFFICIAL REFEREE</div>
+            <img src="${photoUrl}" class="winner-avatar referee-avatar-final">
+            <h1 class="glow-text referee-name-final">${randomPlayer.name}</h1>
         </div>
     `;
 
-    refereeModal.style.display = 'block';
-});
+    // Play a sound if available (optional enhancement)
+    // const audio = new Audio('path/to/reveal-sound.mp3');
+    // audio.play().catch(() => {});
+}
 
 closeModal.addEventListener('click', () => {
     refereeModal.style.display = 'none';
